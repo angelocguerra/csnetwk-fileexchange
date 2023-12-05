@@ -23,11 +23,13 @@ class FileExchangeClient:
         self.server_ip = host
         self.port = port
         self.handle = ""
+        self.is_connected = False
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connect_to_server()
 
     # Connects to the file exchange server and starts the communication loop.
     def connect_to_server(self):
+        self.is_connected = True
         try:
             with self.client_socket:
                 self.client_socket.connect((server_ip_add, int(port)))
@@ -40,6 +42,10 @@ class FileExchangeClient:
                     time.sleep(0.1)
                     user_input = input("\nEnter a command: ")
                     command, *args = user_input.split()
+                    
+                    if self.is_connected == False:
+                        print("Error: Connection to the server lost.")
+                        break
             
                     if self.handle and command == "/register" and len(args) == 1:
                         print("Error: You are already registered with the server.")
@@ -126,6 +132,11 @@ class FileExchangeClient:
                     self.receive_file(filename)
 
             except ConnectionResetError:
+                self.is_connected = False
+                self.server_ip = ""
+                self.port = ""
+                self.handle = ""
+                self.client_socket.close()
                 break
 
     # Sends a file to the server.
