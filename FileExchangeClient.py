@@ -56,7 +56,7 @@ class FileExchangeClient:
                     else:
                         self.send_command(user_input)
                         
-                    if command == '/leave' and self.handle:
+                    if command == '/leave':
                         time.sleep(0.3)
                         exit()
 
