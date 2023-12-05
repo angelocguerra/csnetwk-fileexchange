@@ -51,7 +51,7 @@ class FileExchangeClient:
                     if self.handle and command == "/register" and len(args) == 1:
                         print("Error: You are already registered with the server.")
                     
-                    elif not self.handle and command in ['/dir', '/store', '/get']:
+                    elif not self.handle and command in ['/dir', '/store', '/get', '/broadcast', '/message']:
                         print("Error: You are not registered with the server. Please register first. Type /? for help.")
                         
                     elif command == "/?":
@@ -87,7 +87,7 @@ class FileExchangeClient:
         
         command, *args = input.split()
 
-        if (command in ['/leave', '/dir', '/?'] and len(args) == 0) or (command in ['/register', '/store', '/get'] and len(args) == 1) or (command == '/join' and len(args) == 2):
+        if (command in ['/leave', '/dir', '/?'] and len(args) == 0) or (command in ['/register', '/store', '/get'] and len(args) == 1) or (command == '/join' and len(args) == 2) or (command in ['/broadcast', '/message']):
             return True
 
         elif (command in ['/leave', '/dir', '/?'] and len(args) != 0) or (command in ['/register', '/store', '/get'] and len(args) != 1) or (command == '/join' and len(args) != 2):
@@ -192,6 +192,12 @@ class FileExchangeClient:
         except Exception as e:
             print(f"Error receiving file: {str(e)}")
 
+    def send_broadcast(self, message):
+        self.client_socket.send(f'/broadcast {message}'.encode('utf-8'))
+
+    def send_unicast(self, recipient_handle, message):
+        self.client_socket.send(f'/unicast {recipient_handle} {message}'.encode('utf-8'))
+    
 if __name__ == "__main__":
     while True:
         command = input("Enter a command: ")

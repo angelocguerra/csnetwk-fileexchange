@@ -10,6 +10,7 @@ class FileExchangeServer:
         self.port = port
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.clients = []  # (ip, port, handle)
+        self.client_sockets = {}
         self.files = []
         self.folder_path = 'Server_Files'
         self.start_server()
@@ -30,7 +31,7 @@ class FileExchangeServer:
     def is_command(self, client_socket, input):
             command, *args = input.split()
             
-            if (command in ['/leave', '/dir', '/?'] and len(args) == 0) or (command in ['/register', '/store', '/get'] and len(args) == 1) or (command == '/join' and len(args) == 2):
+            if (command in ['/leave', '/dir', '/?'] and len(args) == 0) or (command in ['/register', '/store', '/get'] and len(args) == 1) or (command == '/join' and len(args) == 2) or (command in ['/broadcast', '/message']):
                 return True
 
             elif (command in ['/leave', '/dir', '/?'] and len(args) != 0) or (command in ['/register', '/store', '/get'] and len(args) != 1) or (command == '/join' and len(args) != 2):
@@ -85,6 +86,15 @@ class FileExchangeServer:
                 elif command == '/?':
                     self.print_help(client_socket)
                     
+                elif command == '/broadcast':
+                    message = ' '.join(args)
+                    self.broadcast_message(f"Broadcast from {handle}: {message}")
+
+                elif command == '/message':
+                    recipient_handle = args[0]
+                    message = ' '.join(args[1:])
+                    self.unicast_message(recipient_handle, f"Message from {handle}: {message}")
+                    
             except ConnectionResetError:
                 break
 
@@ -97,6 +107,7 @@ class FileExchangeServer:
     def register_client(self, client_socket, handle):
         client_address = client_socket.getpeername()
         self.clients.append((client_address[0], client_address[1], handle))
+        self.client_sockets[handle] = client_socket
         
         client_socket.send(f"Welcome {handle}!".encode('utf-8'))
 
@@ -161,6 +172,22 @@ class FileExchangeServer:
         Request command help to output all Input: /?
         """
         client_socket.send(help_info.encode('utf-8'))
+
+    def broadcast_message(self, message):
+        for handle, socket in self.client_sockets.items():
+            try:
+                socket.send(message.encode('utf-8'))
+            except Exception as e:
+                # Handle the exception (e.g., remove the client)
+                print(e)
+
+    def unicast_message(self, recipient_handle, message):
+        if recipient_handle in self.client_sockets:
+            try:
+                self.client_sockets[recipient_handle].send(message.encode('utf-8'))
+            except Exception as e:
+                # Handle the exception (e.g., remove the client)
+                print(e)
         
 if __name__ == "__main__":
     server = FileExchangeServer('localhost', 12345)
