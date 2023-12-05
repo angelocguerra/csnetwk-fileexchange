@@ -44,7 +44,7 @@ class FileExchangeClient:
                     if self.handle and command == "/register" and len(args) == 1:
                         print("Error: You are already registered with the server.")
                     
-                    elif not self.handle and command in ['/leave', '/dir', '/store', '/get']:
+                    elif not self.handle and command in ['/dir', '/store', '/get']:
                         print("Error: You are not registered with the server. Please register first. Type /? for help.")
                         
                     elif command == "/?":
