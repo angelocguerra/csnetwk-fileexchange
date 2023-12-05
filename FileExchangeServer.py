@@ -2,6 +2,7 @@ import socket
 import threading
 import os
 from datetime import datetime
+import time
 
 class FileExchangeServer:
     def __init__(self, host, port):
@@ -56,8 +57,9 @@ class FileExchangeServer:
                     client_socket.send("Error: You are already connected to the server.".encode('utf-8'))
                 
                 elif command == '/leave':
-                    self.remove_client(client_socket)
                     client_socket.send("Connection closed. Thank you!".encode('utf-8'))
+                    time.sleep(0.1)
+                    self.remove_client(client_socket)
                     client_socket.close()
                     break
 

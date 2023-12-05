@@ -24,6 +24,7 @@ class FileExchangeClient:
         self.port = port
         self.handle = ""
         self.is_connected = False
+        self.is_left = False
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connect_to_server()
 
@@ -39,14 +40,14 @@ class FileExchangeClient:
                 receive_thread.start()
 
                 while True:
+                    if self.is_connected == False:
+                        print("Error: Connection to the server lost.")
+                        return
+                    
                     time.sleep(0.1)
                     user_input = input("\nEnter a command: ")
                     command, *args = user_input.split()
                     
-                    if self.is_connected == False:
-                        print("Error: Connection to the server lost.")
-                        break
-            
                     if self.handle and command == "/register" and len(args) == 1:
                         print("Error: You are already registered with the server.")
                     
@@ -61,17 +62,17 @@ class FileExchangeClient:
                         
                     else:
                         self.send_command(user_input)
-                        
-                    if command == '/leave':
-                        time.sleep(0.3)
-                        exit()
+                    
+                    time.sleep(0.1)
+                    if self.is_left:
+                        return
 
         except ConnectionRefusedError:
             print("Error: Connection to the Server has failed! Please check IP Address and Port Number.")
 
         except socket.timeout:
             print("Error: Connection to the Server has failed! Please check IP Address and Port Number.")
-            
+        
         except Exception:
             print("Error: Connection to the Server has failed! Please check IP Address and Port Number.")
 
@@ -122,7 +123,10 @@ class FileExchangeClient:
                     
                 elif data.startswith('Connection closed.'):
                     print(data)
-                    exit()
+                    self.is_left = True
+                    print(self.is_left)
+                    self.client_socket.close()
+                    break
                     
                 elif not data.startswith('File received from Server:'):
                     print(data)
@@ -204,7 +208,10 @@ if __name__ == "__main__":
             Connect to the server application: /join <server_ip_add> <port>
             """
             print(help_info)
+        
+        elif command in ['/leave', '/dir', '/register', '/store', '/get']:
+            print("Error: Please connect to the server before entering a command. Enter /? for help.")
             
         else:
-            print("Error: Please connect to the server before entering a command. Enter /? for help.")  
+            print("Error: Invalid Input. Enter /? for help.")  
     
