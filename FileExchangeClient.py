@@ -200,8 +200,7 @@ class FileExchangeGUI:
 
         self.text_area = tkst.ScrolledText(self.root, wrap=tk.WORD, width=50, height=20)
         self.text_area.pack(padx=10, pady=10)
-        self.text_area.insert(tk.END,
-                              "Welcome to the File Exchange Client! Connect to the server application using /join <server_ip_add> <port>\n")
+        self.text_area.insert(tk.END,"Welcome to the File Exchange Client! Connect to the server application using /join <server_ip_add> <port>\n")
 
         self.entry_command = tk.Entry(self.root, width=50)
         self.entry_command.pack(padx=10, pady=10)
