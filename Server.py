@@ -164,6 +164,7 @@ class FileExchangeServer:
 
     def print_help(self, client_socket):
         help_info = """
+        Connect to the server application: /join <server_ip> <port>
         Disconnect to the server application: /leave
         Register a unique handle or alias: /register <handle>
         Send file to server: /store <filename>

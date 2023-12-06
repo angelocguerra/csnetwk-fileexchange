@@ -253,9 +253,8 @@ class FileExchangeGUI:
                 self.text_area.yview(tk.END)
 
             elif command == "/?":
-                help_info = "Connect to the server application: /join <server_ip> <port>\n"
-                print(help_info)
-                self.text_area.insert(tk.END, help_info)
+                print(command)
+                self.file_exchange_client.send_command(command)
                 self.text_area.yview(tk.END)
 
             elif command.split()[0] in ['/leave', '/dir', '/register', '/store', '/get']:
@@ -284,9 +283,8 @@ class FileExchangeGUI:
                 self.text_area.yview(tk.END)
 
             elif command == "/?":
-                help_info = "Register with the server: /register <handle>\n"
-                print(help_info)
-                self.text_area.insert(tk.END, help_info)
+                print(command)
+                self.file_exchange_client.send_command(command)
                 self.text_area.yview(tk.END)
 
             elif command.startswith('/join'):
