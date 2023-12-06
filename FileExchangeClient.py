@@ -209,16 +209,19 @@ class FileExchangeGUI:
                     print("Error: Connection to the Server has failed! Please check IP Address and Port Number")
                     self.text_area.insert(tk.END, "Error: Connection to the Server has failed! Please check IP Address and Port Number\n")
                     self.text_area.yview(tk.END)
+                    self.file_exchange_client = None
 
                 except socket.timeout:
                     print("Error: Connection to the Server has failed! Please check IP Address and Port Number")
                     self.text_area.insert(tk.END, "Error: Connection to the Server has failed! Please check IP Address and Port Number\n")
                     self.text_area.yview(tk.END)
+                    self.file_exchange_client = None
 
                 except Exception:
                     print("Error: Connection to the Server has failed! Please check IP Address and Port Number")
                     self.text_area.insert(tk.END, "Error: Connection to the Server has failed! Please check IP Address and Port Number\n")
                     self.text_area.yview(tk.END)
+                    self.file_exchange_client = None
 
             elif command.startswith('/join') and len(command.split()) != 3:
                 print("Error: Command parameters do not match or is not allowed.")
