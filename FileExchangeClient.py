@@ -214,10 +214,11 @@ class FileExchangeGUI:
         self.text_area.insert(tk.END, f"\n{command}\n")
         self.text_area.yview(tk.END)
         self.entry_command.delete(0, tk.END)
+        command, *args = command.split()
 
         if self.file_exchange_client is None:
-            if command.startswith('/join') and len(command.split()) == 3:
-                _, server_ip_add, port = command.split()
+            if command.startswith('/join') and len(args) == 2:
+                server_ip_add, port = args
                 self.file_exchange_client = FileExchangeClient(server_ip_add, int(port))
 
                 try:
