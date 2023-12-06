@@ -50,10 +50,12 @@ class FileExchangeClient:
                 command in ['/register', '/store', '/get'] and len(args) != 1) or (
                 command == '/join' and len(args) != 2):
             print("Error: Command parameters do not match or is not allowed.")
+            self.message_queue.put("Error: Command parameters do not match or is not allowed.")
             return False
 
         else:
             print('Error: Command not found.')
+            self.message_queue.put('Error: Command not found.')
             return False
 
     # Sends a command to the server.
@@ -62,17 +64,34 @@ class FileExchangeClient:
     #     command (str): The command to send.
     def send_command(self, command):
         if self.is_command(command):
-            self.client_socket.send(command.encode('utf-8'))
+            if not self.is_connected:
+                print("Error: Connection to the server lost. Please reconnect.")
+                self.message_queue.put("Error: Connection to the server lost. Please reconnect.")
+                return
 
-            if command.startswith('/store'):
-                filename = command.split()[1]
-                self.send_file(filename)
+            try:
+                self.client_socket.send(command.encode('utf-8'))
+
+                if command.startswith('/store'):
+                    filename = command.split()[1]
+                    self.send_file(filename)
+            except ConnectionResetError:
+                print("Connection to the server lost.")
+                self.message_queue.put("Connection to the server lost.")
+                self.is_connected = False
 
     # Receives data from the server.
     def receive_data(self):
         while True:
             try:
                 data = self.client_socket.recv(1024).decode('utf-8')
+
+                if not data:
+                    print("Connection to the server lost.")
+                    self.message_queue.put("Connection to the server lost.")
+                    self.is_connected = False
+                    self.client_socket.close()
+                    break
 
                 if data.startswith('Welcome') and self.handle == "":
                     print(data)
@@ -97,12 +116,19 @@ class FileExchangeClient:
                     self.receive_file(filename)
 
             except ConnectionResetError:
+                print("Connection to the server lost.")
                 self.is_connected = False
                 self.server_ip_add = ""
                 self.port = ""
                 self.handle = ""
                 self.client_socket.close()
                 break
+
+            except UnicodeDecodeError:
+                print("Error: Invalid input received from the server.")
+                self.message_queue.put("Error: Invalid data received from the server.")
+                break
+
 
     # Sends a file to the server.
     #
@@ -195,15 +221,14 @@ class FileExchangeGUI:
                 self.file_exchange_client = FileExchangeClient(server_ip_add, int(port))
 
                 try:
-                    with self.file_exchange_client.client_socket as client_socket:
-                        client_socket.connect((server_ip_add, int(port)))
-                        self.file_exchange_client.is_connected = True
+                    self.file_exchange_client.client_socket.connect((server_ip_add, int(port)))
+                    self.file_exchange_client.is_connected = True
 
-                        receive_thread = threading.Thread(target=self.file_exchange_client.receive_data)
-                        receive_thread.start()
+                    receive_thread = threading.Thread(target=self.file_exchange_client.receive_data)
+                    receive_thread.start()
 
-                        self.text_area.insert(tk.END, f"Connected to server {server_ip_add} on port {port}\n")
-                        self.text_area.yview(tk.END)
+                    self.text_area.insert(tk.END, f"Connected to server {server_ip_add} on port {port}\n")
+                    self.text_area.yview(tk.END)
 
                 except ConnectionRefusedError:
                     print("Error: Connection to the Server has failed! Please check IP Address and Port Number")
@@ -254,7 +279,7 @@ class FileExchangeGUI:
                 self.text_area.insert(tk.END, "Error: You are already registered with the server.\n")
                 self.text_area.yview(tk.END)
 
-            elif not self.file_exchange_client.handle and command in ['/dir', '/store', '/get', '/broadcast',                                      '/message']:
+            elif not self.file_exchange_client.handle and command.startswith(('/dir', '/store', '/get', '/broadcast', '/message')):
                 print("Error: You are not registered with the server. Please register first. Type /? for help.")
                 self.text_area.insert(tk.END, "Error: You are not registered with the server. Please register first. Type /? for help.\n")
                 self.text_area.yview(tk.END)
@@ -263,6 +288,11 @@ class FileExchangeGUI:
                 help_info = "Register with the server: /register <handle>\n"
                 print(help_info)
                 self.text_area.insert(tk.END, help_info)
+                self.text_area.yview(tk.END)
+
+            elif command.startswith('/join'):
+                print("Error: You are already connected to the server.")
+                self.text_area.insert(tk.END, "Error: You are already connected to the server.\n")
                 self.text_area.yview(tk.END)
 
             else:
