@@ -4,8 +4,6 @@ from datetime import datetime
 import tkinter as tk
 import tkinter.scrolledtext as tkst
 from queue import Queue
-from tkinter import ttk
-from ttkthemes import ThemedTk
 
 
 # Represents a client for file exchange with a server.
@@ -197,30 +195,17 @@ class FileExchangeClient:
 class FileExchangeGUI:
     def __init__(self):
         self.file_exchange_client = None
-        self.root = ThemedTk(theme="black")  # Use "black" theme as a base
-        self.root.title("Christmas File Exchange Client")
-        self.root.geometry("600x400")  # Set the initial window size
-        self.root.configure(background="#144714")
+        self.root = tk.Tk()
+        self.root.title("File Exchange Client")
 
-        # Christmas colors
-        bg_color = "#144714"  # Dark green
-        text_color = "#FFD700"  # Gold
-
-        # Configure the style to customize widget appearance
-        style = ttk.Style()
-        style.configure("TLabel", foreground=text_color, background=bg_color)
-        style.configure("TButton", foreground=text_color, background="#800000")  # Dark red
-
-        self.text_area = tkst.ScrolledText(self.root, wrap=tk.WORD, width=80, height=10, foreground=text_color,
-                                           background=bg_color)
+        self.text_area = tkst.ScrolledText(self.root, wrap=tk.WORD, width=50, height=20)
         self.text_area.pack(padx=10, pady=10)
-        self.text_area.insert(tk.END, "🎄 Welcome to the Christmas File Exchange Client! 🎄\nConnect to the server using /join <server_ip_add> <port>\n")
+        self.text_area.insert(tk.END,"Welcome to the File Exchange Client! Connect to the server application using /join <server_ip_add> <port>\n")
 
-        self.entry_command = ttk.Entry(self.root, width=50)
+        self.entry_command = tk.Entry(self.root, width=50)
         self.entry_command.pack(padx=10, pady=10)
-        self.entry_command.configure(foreground=text_color, background=bg_color)
 
-        self.send_button = ttk.Button(self.root, text="Send Command", command=self.send_command)
+        self.send_button = tk.Button(self.root, text="Send Command", command=self.send_command)
         self.send_button.pack(pady=10)
 
     def send_command(self):
