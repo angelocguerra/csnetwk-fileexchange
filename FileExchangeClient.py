@@ -214,11 +214,10 @@ class FileExchangeGUI:
         self.text_area.insert(tk.END, f"\n{command}\n")
         self.text_area.yview(tk.END)
         self.entry_command.delete(0, tk.END)
-        command, *args = command.split()
 
         if self.file_exchange_client is None:
-            if command.startswith('/join') and len(args) == 2:
-                server_ip_add, port = args
+            if command.startswith('/join') and len(command.split()) == 3:
+                _, server_ip_add, port = command.split()
                 self.file_exchange_client = FileExchangeClient(server_ip_add, int(port))
 
                 try:
@@ -260,7 +259,7 @@ class FileExchangeGUI:
                 self.text_area.insert(tk.END, help_info)
                 self.text_area.yview(tk.END)
 
-            elif command in ['/leave', '/dir', '/register', '/store', '/get']:
+            elif command.split()[0] in ['/leave', '/dir', '/register', '/store', '/get']:
                 print("Error: Please connect to the server before entering a command. Enter /? for help.")
                 self.text_area.insert(tk.END, "Error: Please connect to the server before entering a command. Enter /? for help.\n")
                 self.text_area.yview(tk.END)
@@ -297,6 +296,7 @@ class FileExchangeGUI:
                 self.text_area.yview(tk.END)
 
             else:
+                print(command)
                 self.file_exchange_client.send_command(command)
                 self.text_area.yview(tk.END)
 
@@ -308,6 +308,10 @@ class FileExchangeGUI:
                 message = self.file_exchange_client.message_queue.get()
                 self.text_area.insert(tk.END, f"{message}\n")
                 self.text_area.yview(tk.END)
+                if message.startswith('Connection closed.'):
+                    self.file_exchange_client = None
+                    break
+                
         self.root.after(100, self.update_text_area)
 
     def run(self):
