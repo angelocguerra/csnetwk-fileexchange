@@ -268,15 +268,7 @@ class FileExchangeGUI:
                 self.text_area.yview(tk.END)
 
             elif command == "/?":
-                help_info = """
-                Connect to the server application: /join <server_ip> <port>
-                Disconnect to the server application: /leave
-                Register a unique handle or alias: /register <handle>
-                Send file to server: /store <filename>
-                Request directory file list from a server: /dir
-                Fetch a file from a server: /get <filename>
-                Request command help to output all Input: /?
-                """
+                help_info = 'Connect to the server application: /join <server_ip> <port>\nDisconnect to the server application: /leave\nRegister a unique handle or alias: /register <handle>\nSend file to server: /store <filename>\nRequest directory file list from a server: /dir\nFetch a file from a server: /get <filename>\nRequest command help to output all Input: /?'
                 print(help_info)
                 self.text_area.insert(tk.END, help_info)
                 self.text_area.yview(tk.END)
